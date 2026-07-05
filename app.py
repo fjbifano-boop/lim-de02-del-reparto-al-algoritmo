@@ -174,6 +174,21 @@ def estado_reparto(dividendo: int, divisor: int):
     return cociente_parcial, repartido, restante
 
 
+
+def leer_entero(texto: str, nombre: str, minimo: int = 1):
+    try:
+        valor = int(texto)
+    except ValueError:
+        st.error(f"{nombre} debe ser un número entero.")
+        return None
+
+    if valor < minimo:
+        st.error(f"{nombre} debe ser mayor o igual que {minimo}.")
+        return None
+
+    return valor
+
+
 def registrar_decision(cantidad: int, dividendo: int, divisor: int):
     cociente_parcial, repartido, restante = estado_reparto(dividendo, divisor)
 
@@ -415,4 +430,4 @@ st.markdown("### Sobre este laboratorio")
 st.markdown(
     "**Del reparto al algoritmo** forma parte de **LIM (Laboratorio de Ideas Matemáticas)**."
 )
-st.markdown("**Versión:** 0.2 (prototipo)")
+st.markdown("**Versión:** 0.3 (prototipo)")
