@@ -281,6 +281,79 @@ def render_descomposicion(dividendo: int, divisor: int, restante: int):
     """, unsafe_allow_html=True)
 
 
+
+def render_previsualizacion_decision(decision: int | None, dividendo: int, divisor: int, restante: int):
+    if decision is None:
+        return False
+
+    producto = decision * divisor
+    nuevo_restante = restante - producto
+
+    if producto <= restante:
+        st.markdown(f"""
+        <div class="info">
+            Si das <span class="num">{decision}</span> más a cada grupo, usás
+            <span class="num">{divisor} × {decision} = {producto}</span> objetos.
+            Después quedarían <span class="num">{nuevo_restante}</span> objetos.
+        </div>
+        """, unsafe_allow_html=True)
+        return True
+
+    exceso = producto - restante
+    st.error(
+        f"Con esta decisión te pasás: {divisor} × {decision} = {producto}, "
+        f"pero quedan {restante} objetos. Te pasás por {exceso}."
+    )
+    return False
+
+
+def render_restas_sucesivas(dividendo: int, divisor: int):
+    if not st.session_state.pasos:
+        return
+
+    st.markdown("### Las restas sucesivas que hicimos")
+    st.write(
+        "Cada decisión de reparto puede verse como una resta. "
+        "Al usar cantidades grandes, hacemos menos restas que si restáramos el divisor una y otra vez."
+    )
+
+    restante_parcial = dividendo
+
+    st.markdown('<div class="panel">', unsafe_allow_html=True)
+    for i, paso in enumerate(st.session_state.pasos, start=1):
+        producto = divisor * paso
+        nuevo_restante = restante_parcial - producto
+        st.markdown(f"""
+        <div class="card">
+            <div class="expr">
+                {restante_parcial} − ({divisor} × {paso}) = {nuevo_restante}
+            </div>
+            <div class="note">
+                En el paso {i}, en lugar de restar {divisor} muchas veces, restamos {producto} de una sola vez.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        restante_parcial = nuevo_restante
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_economia(divisor: int):
+    if not st.session_state.pasos:
+        return
+
+    cociente = sum(st.session_state.pasos)
+    suma = " + ".join(str(p) for p in st.session_state.pasos)
+
+    st.markdown("### Cómo se economiza la escritura")
+    st.markdown(f"""
+    <div class="panel">
+        <div class="expr">Cociente construido: {suma} = <span class="orange">{cociente}</span></div>
+        <div class="expr">En lugar de registrar varios repartos parciales, podemos reunirlos en uno solo:</div>
+        <div class="expr"><span class="green">{divisor} × ({suma})</span> = <span class="green">{divisor} × {cociente}</span></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 # -----------------------------
 # Interfaz
 # -----------------------------
@@ -354,14 +427,15 @@ with col_decision:
         value=str(sugerido)
     )
 
+decision = leer_entero(decision_txt, "La decisión de reparto", minimo=1)
+decision_valida = render_previsualizacion_decision(decision, dividendo, divisor, restante)
+
 with col_registro:
     st.write("")
     st.write("")
-    if st.button("Registrar esta decisión", use_container_width=True):
-        decision = leer_entero(decision_txt, "La decisión de reparto", minimo=1)
-        if decision is not None:
-            registrar_decision(decision, dividendo, divisor)
-            st.rerun()
+    if st.button("Registrar esta decisión", use_container_width=True, disabled=not decision_valida):
+        registrar_decision(decision, dividendo, divisor)
+        st.rerun()
 
 col_undo, col_reset = st.columns(2)
 
@@ -430,4 +504,4 @@ st.markdown("### Sobre este laboratorio")
 st.markdown(
     "**Del reparto al algoritmo** forma parte de **LIM (Laboratorio de Ideas Matemáticas)**."
 )
-st.markdown("**Versión:** 0.3 (prototipo)")
+st.markdown("**Versión:** 0.4 (prototipo)")
