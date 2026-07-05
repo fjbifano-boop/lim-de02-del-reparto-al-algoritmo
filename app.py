@@ -16,11 +16,11 @@ st.set_page_config(
 if "pasos" not in st.session_state:
     st.session_state.pasos = []
 
-if "dividendo_actual" not in st.session_state:
-    st.session_state.dividendo_actual = 3478
+if "dividendo" not in st.session_state:
+    st.session_state.dividendo = 3478
 
-if "divisor_actual" not in st.session_state:
-    st.session_state.divisor_actual = 24
+if "divisor" not in st.session_state:
+    st.session_state.divisor = 24
 
 
 # -----------------------------
@@ -290,33 +290,30 @@ st.info(
 st.divider()
 
 # Paso 1
-step(1, "Elegí una división para explorar")
+step(1, "Escribí una división para explorar")
 
-col_a, col_b = st.columns(2)
+col_a, col_b, col_c = st.columns([1.2, 1.2, 0.8])
 
 with col_a:
-    dividendo = st.number_input(
-        "Cantidad total de objetos",
-        min_value=1,
-        max_value=99999,
-        value=st.session_state.dividendo_actual,
-        step=1
-    )
+    dividendo_txt = st.text_input("Cantidad total de objetos", value=str(st.session_state.dividendo))
 
 with col_b:
-    divisor = st.number_input(
-        "Cantidad de grupos",
-        min_value=1,
-        max_value=999,
-        value=st.session_state.divisor_actual,
-        step=1
-    )
+    divisor_txt = st.text_input("Cantidad de grupos", value=str(st.session_state.divisor))
 
-if dividendo != st.session_state.dividendo_actual or divisor != st.session_state.divisor_actual:
-    st.session_state.dividendo_actual = dividendo
-    st.session_state.divisor_actual = divisor
-    reiniciar()
-    st.rerun()
+with col_c:
+    st.write("")
+    st.write("")
+    if st.button("Aplicar división", use_container_width=True):
+        nuevo_dividendo = leer_entero(dividendo_txt, "La cantidad total de objetos", minimo=1)
+        nuevo_divisor = leer_entero(divisor_txt, "La cantidad de grupos", minimo=1)
+        if nuevo_dividendo is not None and nuevo_divisor is not None:
+            st.session_state.dividendo = nuevo_dividendo
+            st.session_state.divisor = nuevo_divisor
+            reiniciar()
+            st.rerun()
+
+dividendo = st.session_state.dividendo
+divisor = st.session_state.divisor
 
 cociente, repartido, restante = estado_reparto(dividendo, divisor)
 
@@ -337,20 +334,19 @@ sugerido = sugerencia(restante, divisor)
 col_decision, col_registro = st.columns([2, 1])
 
 with col_decision:
-    decision = st.number_input(
+    decision_txt = st.text_input(
         "Dar esta cantidad más a cada grupo",
-        min_value=1,
-        max_value=99999,
-        value=sugerido,
-        step=1
+        value=str(sugerido)
     )
 
 with col_registro:
     st.write("")
     st.write("")
     if st.button("Registrar esta decisión", use_container_width=True):
-        registrar_decision(decision, dividendo, divisor)
-        st.rerun()
+        decision = leer_entero(decision_txt, "La decisión de reparto", minimo=1)
+        if decision is not None:
+            registrar_decision(decision, dividendo, divisor)
+            st.rerun()
 
 col_undo, col_reset = st.columns(2)
 
@@ -419,4 +415,4 @@ st.markdown("### Sobre este laboratorio")
 st.markdown(
     "**Del reparto al algoritmo** forma parte de **LIM (Laboratorio de Ideas Matemáticas)**."
 )
-st.markdown("**Versión:** 0.1 reconstruida (primer prototipo)")
+st.markdown("**Versión:** 0.2 (prototipo)")
