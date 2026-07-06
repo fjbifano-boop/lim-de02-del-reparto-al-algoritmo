@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="LIM - Del reparto al algoritmo", layout="wide")
 
@@ -151,31 +152,139 @@ def restas(dividendo, divisor):
     st.markdown('</div>', unsafe_allow_html=True)
 
 def cuenta_escolar(dividendo, divisor, resto):
-    if not st.session_state.pasos: return
+    if not st.session_state.pasos:
+        return
+
     q = sum(st.session_state.pasos)
     suma = " + ".join(str(p) for p in st.session_state.pasos)
     parcial = dividendo
+
     rows = f"""
-    <tr><td class="orange">{dividendo}</td><td class="divisor">{divisor}</td></tr>
-    <tr><td></td><td class="quot">{q}</td></tr>
+    <tr>
+        <td class="num-left">{dividendo}</td>
+        <td class="divisor-cell">{divisor}</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td class="quotient-cell">{q}</td>
+    </tr>
     """
+
     for p in st.session_state.pasos:
         prod = divisor * p
         nuevo = parcial - prod
         rows += f"""
-        <tr><td class="sub">− {prod}</td><td></td></tr>
-        <tr><td style="border-top:2px solid #f8fafc;">{nuevo}</td><td></td></tr>
+        <tr>
+            <td class="sub-cell">− {prod}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="result-cell">{nuevo}</td>
+            <td></td>
+        </tr>
         """
         parcial = nuevo
+
+    altura = max(360, 170 + len(st.session_state.pasos) * 64)
+
+    html = f"""
+    <html>
+    <head>
+    <style>
+        body {{
+            margin: 0;
+            background: #020617;
+            color: #f8fafc;
+            font-family: Arial, sans-serif;
+        }}
+        .alg {{
+            border: 1px solid rgba(148,163,184,.40);
+            background: rgba(2,6,23,.42);
+            border-radius: 12px;
+            padding: 22px;
+            overflow-x: auto;
+        }}
+        .wrap {{
+            display: flex;
+            gap: 34px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }}
+        table {{
+            border-collapse: collapse;
+            font-family: "Courier New", monospace;
+            font-size: 24px;
+            color: #f8fafc;
+        }}
+        td {{
+            padding: 4px 14px;
+            text-align: right;
+            white-space: nowrap;
+        }}
+        .num-left {{
+            color: #fb923c;
+            font-weight: 900;
+        }}
+        .divisor-cell {{
+            border-left: 4px solid #f8fafc;
+            border-bottom: 4px solid #f8fafc;
+            color: #93c5fd;
+            font-weight: 900;
+            text-align: center;
+        }}
+        .quotient-cell {{
+            color: #86efac;
+            font-weight: 900;
+            text-align: center;
+        }}
+        .sub-cell {{
+            color: #86efac;
+            font-weight: 900;
+        }}
+        .result-cell {{
+            border-top: 2px solid #f8fafc;
+            color: #f8fafc;
+        }}
+        .note {{
+            font-size: 16px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            max-width: 430px;
+        }}
+        .yellow {{
+            color: #facc15;
+            font-weight: 900;
+        }}
+    </style>
+    </head>
+    <body>
+        <div class="alg">
+            <div class="wrap">
+                <div>
+                    <table>
+                        {rows}
+                    </table>
+                </div>
+                <div class="note">
+                    <p><span class="yellow">Cociente construido:</span> {suma} = <b>{q}</b></p>
+                    <p><span class="yellow">Resto:</span> {resto}</p>
+                    <p>
+                        Esta cuenta organiza de manera más económica las restas que ya hicimos durante el reparto.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
     st.markdown("### La misma estrategia en una cuenta de dividir")
-    st.write("La cuenta escolar puede verse como una forma de ubicar verticalmente las restas parciales. El cociente aparece como la suma de las decisiones tomadas.")
-    st.markdown(f"""<div class="alg"><div class="alg-wrap"><div>
-    <table class="alg-table">{rows}</table></div>
-    <div class="alg-note">
-    <p><span class="yellow">Cociente construido:</span> {suma} = <b>{q}</b></p>
-    <p><span class="yellow">Resto:</span> {resto}</p>
-    <p>Esta cuenta organiza de manera más económica las restas que ya hicimos durante el reparto.</p>
-    </div></div></div>""", unsafe_allow_html=True)
+    st.write(
+        "La cuenta escolar puede verse como una forma de ubicar verticalmente las restas parciales. "
+        "El cociente aparece como la suma de las decisiones tomadas."
+    )
+    components.html(html, height=altura, scrolling=True)
+
 
 def economia(divisor):
     if not st.session_state.pasos: return
@@ -276,4 +385,4 @@ if st.checkbox("Mostrar una ayuda"):
 st.divider()
 st.markdown("### Sobre este laboratorio")
 st.markdown("**Del reparto al algoritmo** forma parte de **LIM (Laboratorio de Ideas Matemáticas)**.")
-st.markdown("**Versión:** 0.5 (prototipo)")
+st.markdown("**Versión:** 0.6 (prototipo)")
