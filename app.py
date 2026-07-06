@@ -76,7 +76,7 @@ def registrar(decision, dividendo, divisor):
     q, rep, resto = estado(dividendo, divisor)
     prod = decision * divisor
     if prod > resto:
-        st.warning(f"Con esa decisión te pasás: necesitarías {prod} objetos y quedan {resto} por repartir.")
+        st.warning(f"Con esa decisión no alcanza: necesitarías {prod} objetos y quedan {resto} por repartir.")
         return
     st.session_state.pasos.append(decision)
 
@@ -93,7 +93,18 @@ def resumen(dividendo, divisor, q, resto):
 def preview(decision, divisor, resto):
     if decision is None:
         return False
+
+    # Si queda menos que la cantidad de grupos, el reparto entero ya terminó.
+    # No corresponde decir "te pasás": eso que queda es el resto.
+    if resto < divisor:
+        st.markdown(f"""<div class="ok">
+        Ya no alcanza para dar 1 objeto más a cada grupo.
+        Quedan <span class="red"><b>{resto}</b></span> objetos: esa cantidad es el resto.
+        </div>""", unsafe_allow_html=True)
+        return False
+
     prod = decision * divisor
+
     if prod <= resto:
         nuevo = resto - prod
         st.markdown(f"""<div class="ok">
@@ -102,12 +113,15 @@ def preview(decision, divisor, resto):
         Después quedarían <span class="red"><b>{nuevo}</b></span> objetos por repartir.
         </div>""", unsafe_allow_html=True)
         return True
+
     exceso = prod - resto
     maximo = resto // divisor
+
     st.markdown(f"""<div class="warn">
-    Con esa decisión te pasás: <span class="red"><b>{divisor} × {decision} = {prod}</b></span>,
+    Con esa decisión no alcanza: <span class="red"><b>{divisor} × {decision} = {prod}</b></span>,
     pero quedan <span class="orange"><b>{resto}</b></span> objetos por repartir.
-    Te pasás por <span class="red"><b>{exceso}</b></span> objetos.<br><br>
+    Harían falta <span class="red"><b>{exceso}</b></span> objetos más.
+    <br><br>
     Con lo que queda, como máximo podrías dar <span class="orange"><b>{maximo}</b></span> más a cada grupo.
     </div>""", unsafe_allow_html=True)
     return False
@@ -385,4 +399,4 @@ if st.checkbox("Mostrar una ayuda"):
 st.divider()
 st.markdown("### Sobre este laboratorio")
 st.markdown("**Del reparto al algoritmo** forma parte de **LIM (Laboratorio de Ideas Matemáticas)**.")
-st.markdown("**Versión:** 0.6 (prototipo)")
+st.markdown("**Versión:** 0.7 (prototipo)")
