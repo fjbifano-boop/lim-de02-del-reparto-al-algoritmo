@@ -1,4 +1,6 @@
 import streamlit as st
+import matplotlib.pyplot as plt
+from io import BytesIO
 
 st.set_page_config(
     page_title="LIM - Aproximaciones en la división",
@@ -116,6 +118,15 @@ st.markdown(
         color: #f8fafc;
     }
 
+    .history-card {
+        border: 1px solid rgba(148,163,184,.35);
+        background: rgba(2,6,23,.40);
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 10px;
+        color: #f8fafc;
+    }
+
     .orange {
         color: #fb923c;
         font-weight: 900;
@@ -136,27 +147,11 @@ st.markdown(
         font-weight: 900;
     }
 
-    .small {
-        color: #cbd5e1;
-        font-size: 15px;
-    }
-
-    .history-card {
-        border: 1px solid rgba(148,163,184,.35);
-        background: rgba(2,6,23,.40);
-        border-radius: 10px;
-        padding: 14px;
-        margin-bottom: 10px;
-        color: #f8fafc;
-    }
-
-    /* Botones activos */
     div.stButton > button {
         color: #111827 !important;
         font-weight: 700 !important;
     }
 
-    /* Botones deshabilitados */
     div.stButton > button:disabled {
         color: #64748b !important;
         opacity: 0.70;
@@ -199,13 +194,6 @@ def current_state():
 
 
 def analyze_partial(partial, divisor, remaining):
-    """
-    Analiza la aproximación sin valorar si es 'buena' o 'mala'.
-
-    Devuelve:
-    - possible: el producto no supera lo que queda.
-    - excess: el producto supera lo que queda.
-    """
 
     product = partial * divisor
 
@@ -215,6 +203,211 @@ def analyze_partial(partial, divisor, remaining):
     new_remaining = remaining - product
 
     return "possible", product, new_remaining
+
+
+# =========================================================
+# CUENTA DE DIVIDIR
+# =========================================================
+
+def dibujar_cuenta(
+    dividendo: int,
+    divisor: int,
+    cociente: int,
+    producto: int,
+    resto: int
+) -> BytesIO:
+
+    fig, ax = plt.subplots(figsize=(8, 4.6), dpi=150)
+
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 7)
+    ax.axis("off")
+
+    negro = "#111111"
+    azul = "#0057D9"
+    verde = "#137A2A"
+    naranja = "#C45100"
+    rojo = "#C00000"
+    gris = "#DDDDDD"
+
+    ax.add_patch(
+        plt.Rectangle(
+            (0.2, 0.2),
+            9.6,
+            6.6,
+            linewidth=2,
+            edgecolor=gris,
+            facecolor="white"
+        )
+    )
+
+    x_izq = 3.4
+    x_der = 6.3
+
+    ax.text(
+        x_izq, 5.2,
+        str(dividendo),
+        fontsize=40,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=naranja
+    )
+
+    ax.text(
+        x_der, 5.2,
+        str(divisor),
+        fontsize=40,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=azul
+    )
+
+    ax.plot(
+        [4.8, 4.8],
+        [2.0, 6.1],
+        color=negro,
+        linewidth=4
+    )
+
+    ax.plot(
+        [4.8, 7.55],
+        [4.4, 4.4],
+        color=negro,
+        linewidth=4
+    )
+
+    ax.text(
+        x_der, 3.4,
+        str(cociente),
+        fontsize=40,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=verde
+    )
+
+    ax.text(
+        x_izq, 3.4,
+        f"−{producto}",
+        fontsize=34,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=verde
+    )
+
+    ax.plot(
+        [2.35, 4.35],
+        [2.65, 2.65],
+        color=negro,
+        linewidth=3
+    )
+
+    ax.text(
+        x_izq, 1.7,
+        str(resto),
+        fontsize=40,
+        fontweight="bold",
+        ha="center",
+        va="center",
+        color=rojo
+    )
+
+    ax.annotate(
+        "Dividendo",
+        xy=(x_izq - 0.45, 5.2),
+        xytext=(0.85, 5.2),
+        fontsize=16,
+        fontweight="bold",
+        color=naranja,
+        arrowprops=dict(
+            arrowstyle="->",
+            lw=2.5,
+            color=naranja
+        ),
+        ha="left",
+        va="center"
+    )
+
+    ax.annotate(
+        "Divisor",
+        xy=(x_der + 0.25, 5.2),
+        xytext=(7.85, 5.2),
+        fontsize=16,
+        fontweight="bold",
+        color=azul,
+        arrowprops=dict(
+            arrowstyle="->",
+            lw=2.5,
+            color=azul
+        ),
+        ha="left",
+        va="center"
+    )
+
+    ax.annotate(
+        "Cociente",
+        xy=(x_der + 0.25, 3.4),
+        xytext=(7.85, 3.4),
+        fontsize=16,
+        fontweight="bold",
+        color=verde,
+        arrowprops=dict(
+            arrowstyle="->",
+            lw=2.5,
+            color=verde
+        ),
+        ha="left",
+        va="center"
+    )
+
+    ax.annotate(
+        "Resto",
+        xy=(x_izq + 0.20, 1.7),
+        xytext=(4.75, 1.15),
+        fontsize=16,
+        fontweight="bold",
+        color=rojo,
+        arrowprops=dict(
+            arrowstyle="->",
+            lw=2.5,
+            color=rojo
+        ),
+        ha="left",
+        va="center"
+    )
+
+    ax.text(
+        5,
+        0.55,
+        (
+            f"Al repartir {dividendo} objetos en "
+            f"{divisor} grupos iguales, quedan "
+            f"{cociente} objetos en cada grupo y "
+            f"quedan {resto} objetos sin repartir."
+        ),
+        fontsize=12,
+        ha="center",
+        va="center",
+        color=negro
+    )
+
+    buffer = BytesIO()
+
+    fig.savefig(
+        buffer,
+        format="png",
+        bbox_inches="tight",
+        facecolor="white"
+    )
+
+    plt.close(fig)
+
+    buffer.seek(0)
+
+    return buffer
 
 
 # =========================================================
@@ -237,13 +430,12 @@ st.markdown(
 st.title("Del reparto al algoritmo")
 
 st.subheader(
-    "Probamos cocientes parciales para acercarnos al resultado"
+    "Construimos el cociente mediante aproximaciones sucesivas"
 )
 
 st.write(
-    "Esta versión permite construir una estrategia mediante "
-    "aproximaciones sucesivas: elegir un cociente parcial, "
-    "anticipar qué producto genera y decidir si conviene registrarlo."
+    "Elegí un cociente parcial, anticipá qué producto genera "
+    "y decidí si querés incorporarlo a tu estrategia."
 )
 
 
@@ -270,6 +462,7 @@ with st.container(border=True):
         )
 
     with c3:
+
         st.write("")
         st.write("")
 
@@ -308,31 +501,27 @@ divisor = st.session_state.divisor
 cociente_acumulado, usado, restante = current_state()
 
 st.markdown(
-    f"""
-    <div class='main-expression'>
-        {dividendo} ÷ {divisor}
-    </div>
-    """,
+    f"<div class='main-expression'>{dividendo} ÷ {divisor}</div>",
     unsafe_allow_html=True
 )
 
 
 # =========================================================
-# TRES MOMENTOS DE LA ESTRATEGIA
+# TRES MOMENTOS
 # =========================================================
 
 p1, p2, p3 = st.columns(3)
 
 
 # ---------------------------------------------------------
-# 1. PROBAR
+# 1. PROPONER
 # ---------------------------------------------------------
 
 with p1:
 
     with st.container(border=True):
 
-        st.markdown("### 1. Probar una aproximación")
+        st.markdown("### 1. Proponer")
 
         propuesta_txt = st.text_input(
             "¿Qué cociente parcial querés probar?",
@@ -346,125 +535,113 @@ with p1:
         )
 
         st.caption(
-            "Todavía no se registra. "
-            "Primero miramos qué produce."
+            "Esta propuesta todavía no forma parte de la estrategia. "
+            "Primero observá qué produciría."
         )
 
 
 # ---------------------------------------------------------
-# 2. ANALIZAR
+# 2. ANTICIPAR
 # ---------------------------------------------------------
 
 with p2:
 
     with st.container(border=True):
 
-        st.markdown("### 2. Analizar la aproximación")
+        st.markdown("### 2. Anticipar")
 
         estado = None
-        producto = None
+        producto_propuesto = None
         nuevo_restante = None
 
         if propuesta is not None:
 
-            estado, producto, nuevo_restante = analyze_partial(
+            estado, producto_propuesto, nuevo_restante = analyze_partial(
                 propuesta,
                 divisor,
                 restante
             )
 
             st.markdown(
-                f"""
-                <div class='metric'>
-                    {divisor} × {propuesta} = {producto}
-                </div>
-                """,
+                f"<div class='metric'>"
+                f"{divisor} × {propuesta} = {producto_propuesto}"
+                f"</div>",
                 unsafe_allow_html=True
             )
 
             if estado == "possible":
 
+                mensaje = (
+                    "<div class='possible'>"
+                    "<span class='green'>"
+                    "La propuesta es posible."
+                    "</span><br><br>"
+                    f"Si incorporás <b>{propuesta}</b> "
+                    f"al cociente parcial, se restarían "
+                    f"<b>{producto_propuesto}</b> y quedarían "
+                    f"<b>{nuevo_restante}</b>.<br><br>"
+                    "Podés registrarla o probar otra."
+                    "</div>"
+                )
+
                 st.markdown(
-                    f"""
-                    <div class='possible'>
-                        <span class='green'>
-                            Esta aproximación es posible.
-                        </span>
-                        <br><br>
-                        Si la registrás, quedarían
-                        <b>{nuevo_restante}</b>.
-                        <br><br>
-                        ¿Querés registrarla o probar otra?
-                    </div>
-                    """,
+                    mensaje,
                     unsafe_allow_html=True
                 )
 
             else:
 
-                exceso = producto - restante
+                exceso = producto_propuesto - restante
+
+                mensaje = (
+                    "<div class='excess'>"
+                    "<span class='red'>"
+                    "Esta propuesta supera lo que queda."
+                    "</span><br><br>"
+                    f"Quedan <b>{restante}</b> y el producto "
+                    f"sería <b>{producto_propuesto}</b>.<br><br>"
+                    f"Supera lo disponible en <b>{exceso}</b>."
+                    "</div>"
+                )
 
                 st.markdown(
-                    f"""
-                    <div class='excess'>
-                        <span class='red'>
-                            Esta aproximación supera
-                            lo que queda.
-                        </span>
-                        <br><br>
-                        Quedan <b>{restante}</b>
-                        y el producto sería
-                        <b>{producto}</b>.
-                        <br><br>
-                        El producto supera lo disponible
-                        en <b>{exceso}</b>.
-                        <br><br>
-                        Probá con un cociente parcial menor.
-                    </div>
-                    """,
+                    mensaje,
                     unsafe_allow_html=True
                 )
 
 
 # ---------------------------------------------------------
-# 3. ESTADO DE LA ESTRATEGIA
+# 3. ESTRATEGIA REGISTRADA
 # ---------------------------------------------------------
 
 with p3:
 
     with st.container(border=True):
 
-        st.markdown("### 3. Estado de la estrategia")
+        st.markdown("### 3. Lo registrado")
 
         st.markdown(
-            f"""
-            <div class='metric'>
-                <span class='orange'>
-                    {restante}
-                </span>
-            </div>
-
-            <div style='text-align:center;color:#f8fafc'>
-                quedan por aproximar
-            </div>
-            """,
+            f"<div class='metric'>"
+            f"<span class='orange'>{restante}</span>"
+            f"</div>"
+            f"<div style='text-align:center;color:#f8fafc'>"
+            f"quedan por aproximar"
+            f"</div>",
             unsafe_allow_html=True
         )
 
         st.markdown(
-            f"""
-            <div style='margin-top:18px;color:#f8fafc'>
-                Cociente parcial acumulado:
-                <span class='green'>
-                    {cociente_acumulado}
-                </span>
-                <br><br>
-                Cantidad de aproximaciones:
-                <span class='yellow'>
-                    {len(st.session_state.aproximaciones)}
-                </span>
-            </div>
-            """,
+            (
+                "<div style='margin-top:18px;color:#f8fafc'>"
+                "Cociente parcial acumulado: "
+                f"<span class='green'>{cociente_acumulado}</span>"
+                "<br><br>"
+                "Aproximaciones registradas: "
+                f"<span class='yellow'>"
+                f"{len(st.session_state.aproximaciones)}"
+                "</span>"
+                "</div>"
+            ),
             unsafe_allow_html=True
         )
 
@@ -489,10 +666,7 @@ with c_accept:
         disabled=not can_register
     ):
 
-        st.session_state.aproximaciones.append(
-            propuesta
-        )
-
+        st.session_state.aproximaciones.append(propuesta)
         st.rerun()
 
 
@@ -505,7 +679,6 @@ with c_undo:
     ):
 
         st.session_state.aproximaciones.pop()
-
         st.rerun()
 
 
@@ -518,7 +691,6 @@ with c_reset:
     ):
 
         reset_strategy()
-
         st.rerun()
 
 
@@ -526,11 +698,13 @@ with c_reset:
 # HISTORIAL
 # =========================================================
 
-st.markdown("### Estrategia registrada")
+st.markdown("### Estrategia construida")
 
 if not st.session_state.aproximaciones:
 
-    st.info("Todavía no registraste aproximaciones.")
+    st.info(
+        "Todavía no registraste aproximaciones."
+    )
 
 else:
 
@@ -542,20 +716,22 @@ else:
         start=1
     ):
 
-        producto = divisor * aproximacion
-        nuevo = parcial - producto
+        producto_paso = divisor * aproximacion
+        nuevo = parcial - producto_paso
         acumulado += aproximacion
 
         historial_html = (
-            f"<div class='history-card'>"
+            "<div class='history-card'>"
             f"<b>Paso {i}</b><br><br>"
-            f"Cociente parcial: "
+            "Cociente parcial: "
             f"<span class='orange'>{aproximacion}</span><br>"
-            f"Producto: "
-            f"<span class='green'>{divisor} × {aproximacion} = {producto}</span><br>"
-            f"Quedan: "
+            "Producto: "
+            f"<span class='green'>"
+            f"{divisor} × {aproximacion} = {producto_paso}"
+            "</span><br>"
+            "Quedan: "
             f"<span class='red'>{nuevo}</span>"
-            f"</div>"
+            "</div>"
         )
 
         st.markdown(
@@ -571,12 +747,12 @@ else:
     )
 
     resumen_html = (
-        f"<div class='info'>"
-        f"Cociente construido hasta ahora: "
-        f"<span class='orange'>"
+        "<div class='info'>"
+        "Cociente construido hasta ahora: "
+        "<span class='orange'>"
         f"{expresion_cociente} = {acumulado}"
-        f"</span>"
-        f"</div>"
+        "</span>"
+        "</div>"
     )
 
     st.markdown(
@@ -584,32 +760,97 @@ else:
         unsafe_allow_html=True
     )
 
+
 # =========================================================
-# CIERRE DE LA DIVISIÓN
+# FINALIZACIÓN
 # =========================================================
 
 if restante < divisor:
 
     st.success(
-        f"La división terminó: "
+        f"La estrategia llegó al final: "
         f"cociente {cociente_acumulado} "
         f"y resto {restante}."
     )
 
 
 # =========================================================
-# PREGUNTAS PARA ANALIZAR EL PROTOTIPO
+# DEL PROCEDIMIENTO AL ALGORITMO
+# =========================================================
+
+st.markdown("### Del procedimiento al algoritmo")
+
+with st.container(border=True):
+
+    st.write(
+        "La cuenta de dividir organiza de otra manera "
+        "las mismas cantidades y relaciones."
+    )
+
+    mostrar_cuenta = st.checkbox(
+        "Mostrar la cuenta de dividir"
+    )
+
+    if mostrar_cuenta:
+
+        # Resultado completo de la división
+        cociente_final = dividendo // divisor
+        resto_final = dividendo % divisor
+        producto_final = divisor * cociente_final
+
+        st.image(
+            dibujar_cuenta(
+                dividendo,
+                divisor,
+                cociente_final,
+                producto_final,
+                resto_final
+            ),
+            use_container_width=True
+        )
+
+        st.markdown(
+            f"""
+- **{dividendo}** es el **dividendo**.
+- **{divisor}** es el **divisor**.
+- **{cociente_final}** es el **cociente**.
+- **{resto_final}** es el **resto**.
+- **{producto_final}** es la cantidad representada por **{divisor} × {cociente_final}**.
+"""
+        )
+
+        if st.session_state.aproximaciones:
+
+            st.markdown("#### Compará las dos escrituras")
+
+            st.markdown(
+                f"""
+Tu estrategia construyó hasta ahora:
+
+**{expresion_cociente} = {cociente_acumulado}**
+
+La cuenta de dividir muestra como cociente:
+
+**{cociente_final}**
+
+**¿Dónde pueden reconocerse en la cuenta las aproximaciones que fuiste realizando?**
+"""
+            )
+
+
+# =========================================================
+# PARA OBSERVAR
 # =========================================================
 
 st.markdown("### Para observar en esta versión")
 
 st.markdown(
     """
-    - ¿Resulta natural proponer un cociente parcial?
-    - ¿La anticipación del producto ayuda a decidir antes de registrar?
-    - ¿Conviene que el entorno valore la aproximación o solamente informe qué produce?
-    - ¿El historial permite seguir cómo se va construyendo el cociente?
-    """
+- ¿Qué aproximaciones resultan útiles para avanzar?
+- ¿Cómo se construye el cociente a partir de los cocientes parciales?
+- ¿Qué cambia cuando se elige una aproximación mayor o menor?
+- ¿Qué relación puede establecerse entre la estrategia construida y la cuenta de dividir?
+"""
 )
 
 
@@ -621,14 +862,14 @@ st.divider()
 
 st.markdown(
     """
-    ### ¿Usaste este laboratorio?
+### ¿Usaste este laboratorio?
 
-    Si sos docente y estás pensando utilizar este laboratorio,
-    o ya lo probaste con estudiantes, nos interesa conocer tu experiencia.
+Si sos docente y estás pensando utilizar este laboratorio,
+o ya lo probaste con estudiantes, nos interesa conocer tu experiencia.
 
-    📩 **Contacto:**  
-    [fjbifano@ccpems.exactas.uba.ar](mailto:fjbifano@ccpems.exactas.uba.ar)
-    """
+📩 **Contacto:**  
+[fjbifano@ccpems.exactas.uba.ar](mailto:fjbifano@ccpems.exactas.uba.ar)
+"""
 )
 
 st.caption(
@@ -636,4 +877,4 @@ st.caption(
     "Instituto CeFIEC – FCEN – UBA"
 )
 
-st.caption("Versión 0.9")
+st.caption("Versión 1.0")
