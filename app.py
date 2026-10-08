@@ -1,8 +1,16 @@
 import streamlit as st
 
-st.set_page_config(
-    page_title="LIM - Aproximaciones en la división",
-    layout="wide"
+st.title("¿Cómo economizar una cuenta de dividir?")
+
+st.subheader(
+    "Exploramos distintas maneras de construir el cociente "
+    "mediante aproximaciones sucesivas"
+)
+
+st.write(
+    "Elegí cocientes parciales, observá qué producen y compará "
+    "distintas estrategias. ¿Cómo podrías llegar al resultado "
+    "utilizando menos pasos?"
 )
 
 # =========================================================
