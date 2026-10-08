@@ -156,7 +156,7 @@ st.markdown(
     }
 
     /* =====================================================
-       CUENTA DE DIVIDIR
+       CUENTA PROGRESIVA
        ===================================================== */
 
     .division-wrapper {
@@ -170,78 +170,108 @@ st.markdown(
         color: #111111;
         border: 2px solid #dddddd;
         border-radius: 12px;
-        padding: 28px 36px 22px 36px;
+        padding: 30px 38px;
         width: 100%;
-        max-width: 760px;
+        max-width: 780px;
     }
 
-    .division-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        width: 430px;
-        margin: 0 auto 25px auto;
-        font-size: 40px;
+    .progressive-header {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin: 5px auto 30px auto;
+        font-size: 34px;
         font-weight: 900;
-        text-align: center;
     }
 
-    .dividendo-box {
+    .progressive-dividend {
         color: #C45100;
-        padding: 8px 20px 12px 20px;
+        padding: 12px 28px;
         border-right: 4px solid #111111;
     }
 
-    .divisor-box {
+    .progressive-right {
+        min-width: 330px;
+    }
+
+    .progressive-divisor {
         color: #0057D9;
-        padding: 8px 20px 12px 20px;
+        padding: 12px 25px;
         border-bottom: 4px solid #111111;
     }
 
-    .producto-box {
+    .progressive-quotient {
         color: #137A2A;
-        padding: 12px 20px 8px 20px;
-        border-right: 4px solid #111111;
+        padding: 12px 25px;
+        font-size: 25px;
     }
 
-    .cociente-box {
-        color: #137A2A;
-        padding: 12px 20px 8px 20px;
+    .algorithm-body {
+        max-width: 480px;
+        margin: 0 auto;
     }
 
-    .resto-row {
-        width: 215px;
-        margin-left: calc(50% - 215px);
-        text-align: center;
-        font-size: 40px;
-        font-weight: 900;
-        color: #C00000;
-        border-top: 3px solid #111111;
-        padding-top: 8px;
+    .algorithm-step {
+        margin-bottom: 22px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
     }
 
-    .division-labels {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 25px;
-    }
-
-    .label-chip {
-        background: #f1f5f9;
-        color: #111827;
-        border-radius: 8px;
-        padding: 7px 11px;
+    .algorithm-step-title {
+        color: #64748b;
         font-size: 14px;
         font-weight: 700;
+        margin-bottom: 7px;
     }
 
-    .division-relation {
-        margin-top: 24px;
-        text-align: center;
-        font-size: 21px;
+    .algorithm-operation {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 220px;
+        margin-left: 40px;
+        text-align: right;
+        font-size: 25px;
         font-weight: 800;
         color: #111827;
+    }
+
+    .algorithm-current {
+        color: #111827;
+    }
+
+    .algorithm-minus {
+        color: #137A2A;
+    }
+
+    .algorithm-line {
+        display: block;
+        border-top: 2px solid #111111;
+        margin-top: 3px;
+    }
+
+    .algorithm-result {
+        color: #C00000;
+        padding-top: 4px;
+    }
+
+    .algorithm-finished {
+        margin-top: 25px;
+        padding: 14px;
+        text-align: center;
+        border-radius: 8px;
+        background: #ecfdf5;
+        color: #166534;
+        font-size: 18px;
+    }
+
+    .algorithm-open {
+        margin-top: 25px;
+        padding: 14px;
+        text-align: center;
+        border-radius: 8px;
+        background: #fff7ed;
+        color: #9a3412;
+        font-size: 17px;
     }
 
     </style>
@@ -281,6 +311,7 @@ def current_state():
 
 
 def analyze_partial(partial, divisor, remaining):
+
     product = partial * divisor
 
     if product > remaining:
@@ -291,63 +322,133 @@ def analyze_partial(partial, divisor, remaining):
     return "possible", product, new_remaining
 
 
-def dibujar_cuenta_html(
-    dividendo,
-    divisor,
-    cociente,
-    producto,
-    resto
-):
+def dibujar_cuenta_html(dividendo, divisor, aproximaciones):
     """
-    Construye la cuenta de dividir utilizando únicamente HTML/CSS.
-    No requiere matplotlib.
+    Construye la cuenta progresivamente utilizando solamente
+    las aproximaciones efectivamente registradas.
     """
+
+    if not aproximaciones:
+
+        return (
+            "<div class='division-wrapper'>"
+            "<div class='division-card'>"
+            "<div style='text-align:center;color:#475569;font-size:17px;'>"
+            "Todavía no hay aproximaciones registradas."
+            "</div>"
+            "</div>"
+            "</div>"
+        )
+
+    restante_actual = dividendo
+    cociente_acumulado = 0
+    pasos_html = ""
+
+    for i, aproximacion in enumerate(
+        aproximaciones,
+        start=1
+    ):
+
+        producto = divisor * aproximacion
+        nuevo_restante = restante_actual - producto
+
+        cociente_acumulado += aproximacion
+
+        pasos_html += (
+            "<div class='algorithm-step'>"
+
+            f"<div class='algorithm-step-title'>"
+            f"Paso {i} · cociente parcial {aproximacion}"
+            f"</div>"
+
+            "<div class='algorithm-operation'>"
+
+            f"<span class='algorithm-current'>"
+            f"{restante_actual}"
+            f"</span>"
+
+            f"<span class='algorithm-minus'>"
+            f"− {producto}"
+            f"</span>"
+
+            "<span class='algorithm-line'></span>"
+
+            f"<span class='algorithm-result'>"
+            f"{nuevo_restante}"
+            f"</span>"
+
+            "</div>"
+
+            "</div>"
+        )
+
+        restante_actual = nuevo_restante
+
+    suma = " + ".join(
+        str(x)
+        for x in aproximaciones
+    )
+
+    if len(aproximaciones) > 1:
+        cociente_html = (
+            f"{suma} = {cociente_acumulado}"
+        )
+    else:
+        cociente_html = suma
+
+    if restante_actual < divisor:
+
+        estado_html = (
+            "<div class='algorithm-finished'>"
+            "La estrategia llegó al final.<br>"
+            f"Cociente: <b>{cociente_acumulado}</b>"
+            " &nbsp;·&nbsp; "
+            f"Resto: <b>{restante_actual}</b>"
+            "</div>"
+        )
+
+    else:
+
+        estado_html = (
+            "<div class='algorithm-open'>"
+            f"Todavía quedan <b>{restante_actual}</b>. "
+            "La cuenta puede seguir construyéndose."
+            "</div>"
+        )
 
     return (
         "<div class='division-wrapper'>"
+
         "<div class='division-card'>"
 
-        "<div class='division-grid'>"
+        "<div class='progressive-header'>"
 
-        f"<div class='dividendo-box'>{dividendo}</div>"
-        f"<div class='divisor-box'>{divisor}</div>"
+        f"<div class='progressive-dividend'>"
+        f"{dividendo}"
+        f"</div>"
 
-        f"<div class='producto-box'>−{producto}</div>"
-        f"<div class='cociente-box'>{cociente}</div>"
+        "<div class='progressive-right'>"
 
-        "</div>"
+        f"<div class='progressive-divisor'>"
+        f"{divisor}"
+        f"</div>"
 
-        f"<div class='resto-row'>{resto}</div>"
-
-        "<div class='division-labels'>"
-
-        f"<span class='label-chip'>"
-        f"<span style='color:#C45100'>●</span> "
-        f"Dividendo: {dividendo}"
-        f"</span>"
-
-        f"<span class='label-chip'>"
-        f"<span style='color:#0057D9'>●</span> "
-        f"Divisor: {divisor}"
-        f"</span>"
-
-        f"<span class='label-chip'>"
-        f"<span style='color:#137A2A'>●</span> "
-        f"Cociente: {cociente}"
-        f"</span>"
-
-        f"<span class='label-chip'>"
-        f"<span style='color:#C00000'>●</span> "
-        f"Resto: {resto}"
-        f"</span>"
+        f"<div class='progressive-quotient'>"
+        f"{cociente_html}"
+        f"</div>"
 
         "</div>"
 
-        "<div class='division-relation'>"
-        f"{dividendo} = {divisor} × {cociente} + {resto}"
         "</div>"
 
+        "<div class='algorithm-body'>"
+        f"{pasos_html}"
         "</div>"
+
+        f"{estado_html}"
+
+        "</div>"
+
         "</div>"
     )
 
@@ -392,18 +493,21 @@ with st.container(border=True):
     c1, c2, c3 = st.columns([1.2, 1.2, .8])
 
     with c1:
+
         dividendo_txt = st.text_input(
             "Dividendo",
             value=str(st.session_state.dividendo)
         )
 
     with c2:
+
         divisor_txt = st.text_input(
             "Divisor",
             value=str(st.session_state.divisor)
         )
 
     with c3:
+
         st.write("")
         st.write("")
 
@@ -499,7 +603,11 @@ with p2:
 
         if propuesta is not None:
 
-            estado, producto_propuesto, nuevo_restante = analyze_partial(
+            (
+                estado,
+                producto_propuesto,
+                nuevo_restante
+            ) = analyze_partial(
                 propuesta,
                 divisor,
                 restante
@@ -507,7 +615,8 @@ with p2:
 
             st.markdown(
                 f"<div class='metric'>"
-                f"{divisor} × {propuesta} = {producto_propuesto}"
+                f"{divisor} × {propuesta} "
+                f"= {producto_propuesto}"
                 f"</div>",
                 unsafe_allow_html=True
             )
@@ -516,14 +625,22 @@ with p2:
 
                 mensaje = (
                     "<div class='possible'>"
+
                     "<span class='green'>"
                     "La propuesta es posible."
-                    "</span><br><br>"
+                    "</span>"
+
+                    "<br><br>"
+
                     f"Si incorporás <b>{propuesta}</b> "
-                    f"al cociente parcial, se restarían "
-                    f"<b>{producto_propuesto}</b> y quedarían "
-                    f"<b>{nuevo_restante}</b>.<br><br>"
+                    "al cociente parcial, se restarían "
+                    f"<b>{producto_propuesto}</b> "
+                    f"y quedarían <b>{nuevo_restante}</b>."
+
+                    "<br><br>"
+
                     "Podés registrarla o probar otra."
+
                     "</div>"
                 )
 
@@ -538,12 +655,22 @@ with p2:
 
                 mensaje = (
                     "<div class='excess'>"
+
                     "<span class='red'>"
                     "Esta propuesta supera lo que queda."
-                    "</span><br><br>"
-                    f"Quedan <b>{restante}</b> y el producto "
-                    f"sería <b>{producto_propuesto}</b>.<br><br>"
-                    f"Supera lo disponible en <b>{exceso}</b>."
+                    "</span>"
+
+                    "<br><br>"
+
+                    f"Quedan <b>{restante}</b> "
+                    f"y el producto sería "
+                    f"<b>{producto_propuesto}</b>."
+
+                    "<br><br>"
+
+                    f"Supera lo disponible en "
+                    f"<b>{exceso}</b>."
+
                     "</div>"
                 )
 
@@ -564,25 +691,34 @@ with p3:
         st.markdown("### 3. Lo registrado")
 
         st.markdown(
-            f"<div class='metric'>"
-            f"<span class='orange'>{restante}</span>"
-            f"</div>"
-            f"<div style='text-align:center;color:#f8fafc'>"
-            f"quedan por aproximar"
-            f"</div>",
+            (
+                "<div class='metric'>"
+                f"<span class='orange'>{restante}</span>"
+                "</div>"
+
+                "<div style='text-align:center;color:#f8fafc'>"
+                "quedan por aproximar"
+                "</div>"
+            ),
             unsafe_allow_html=True
         )
 
         st.markdown(
             (
                 "<div style='margin-top:18px;color:#f8fafc'>"
+
                 "Cociente parcial acumulado: "
-                f"<span class='green'>{cociente_acumulado}</span>"
+                f"<span class='green'>"
+                f"{cociente_acumulado}"
+                "</span>"
+
                 "<br><br>"
+
                 "Aproximaciones registradas: "
                 f"<span class='yellow'>"
                 f"{len(st.session_state.aproximaciones)}"
                 "</span>"
+
                 "</div>"
             ),
             unsafe_allow_html=True
@@ -594,6 +730,7 @@ with p3:
 # =========================================================
 
 c_accept, c_undo, c_reset = st.columns(3)
+
 
 with c_accept:
 
@@ -672,15 +809,31 @@ else:
 
         historial_html = (
             "<div class='history-card'>"
-            f"<b>Paso {i}</b><br><br>"
+
+            f"<b>Paso {i}</b>"
+
+            "<br><br>"
+
             "Cociente parcial: "
-            f"<span class='orange'>{aproximacion}</span><br>"
+            f"<span class='orange'>"
+            f"{aproximacion}"
+            "</span>"
+
+            "<br>"
+
             "Producto: "
             f"<span class='green'>"
-            f"{divisor} × {aproximacion} = {producto_paso}"
-            "</span><br>"
+            f"{divisor} × {aproximacion} "
+            f"= {producto_paso}"
+            "</span>"
+
+            "<br>"
+
             "Quedan: "
-            f"<span class='red'>{nuevo}</span>"
+            f"<span class='red'>"
+            f"{nuevo}"
+            "</span>"
+
             "</div>"
         )
 
@@ -698,10 +851,13 @@ else:
 
     resumen_html = (
         "<div class='info'>"
+
         "Cociente construido hasta ahora: "
+
         "<span class='orange'>"
         f"{expresion_cociente} = {acumulado}"
         "</span>"
+
         "</div>"
     )
 
@@ -733,8 +889,9 @@ st.markdown("### Del procedimiento al algoritmo")
 with st.container(border=True):
 
     st.write(
-        "La cuenta de dividir organiza de otra manera "
-        "las mismas cantidades y relaciones."
+        "Podés hacer visible la cuenta para observar cómo "
+        "las aproximaciones que registraste van construyendo "
+        "el procedimiento."
     )
 
     mostrar_cuenta = st.checkbox(
@@ -743,16 +900,10 @@ with st.container(border=True):
 
     if mostrar_cuenta:
 
-        cociente_final = dividendo // divisor
-        resto_final = dividendo % divisor
-        producto_final = divisor * cociente_final
-
         cuenta_html = dibujar_cuenta_html(
             dividendo,
             divisor,
-            cociente_final,
-            producto_final,
-            resto_final
+            st.session_state.aproximaciones
         )
 
         st.markdown(
@@ -760,31 +911,20 @@ with st.container(border=True):
             unsafe_allow_html=True
         )
 
-        st.markdown(
-            f"""
-- **{dividendo}** es el **dividendo**.
-- **{divisor}** es el **divisor**.
-- **{cociente_final}** es el **cociente**.
-- **{resto_final}** es el **resto**.
-- **{producto_final}** corresponde a **{divisor} × {cociente_final}**.
-"""
-        )
-
         if st.session_state.aproximaciones:
 
-            st.markdown("#### Compará las dos escrituras")
+            st.markdown("#### Mirá las dos formas de registrar la estrategia")
 
             st.markdown(
                 f"""
-Hasta ahora construiste el cociente mediante:
+En el historial, el cociente parcial se construyó como:
 
 **{expresion_cociente} = {cociente_acumulado}**
 
-La cuenta de dividir muestra como cociente:
+En la cuenta, cada una de esas aproximaciones aparece asociada
+al producto que se resta y a una nueva cantidad pendiente.
 
-**{cociente_final}**
-
-**¿Dónde pueden reconocerse en la cuenta las aproximaciones que fuiste realizando?**
+**¿Qué relaciones encontrás entre las dos formas de registrar el procedimiento?**
 """
             )
 
@@ -800,7 +940,8 @@ st.markdown(
 - ¿Qué aproximaciones permiten avanzar?
 - ¿Cómo se construye el cociente a partir de los cocientes parciales?
 - ¿Qué cambia cuando elegís una aproximación mayor o menor?
-- ¿Qué relación encontrás entre la estrategia construida y la cuenta de dividir?
+- ¿Qué relaciones aparecen entre las aproximaciones, los productos que se restan y las cantidades que van quedando?
+- ¿Cómo se relaciona la estrategia construida con la cuenta de dividir?
 """
 )
 
@@ -828,4 +969,4 @@ st.caption(
     "Instituto CeFIEC – FCEN – UBA"
 )
 
-st.caption("Versión 1.1")
+st.caption("Versión 1.2")
