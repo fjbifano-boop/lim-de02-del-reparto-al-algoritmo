@@ -1,6 +1,4 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-from io import BytesIO
 
 st.set_page_config(
     page_title="LIM - Aproximaciones en la división",
@@ -157,6 +155,95 @@ st.markdown(
         opacity: 0.70;
     }
 
+    /* =====================================================
+       CUENTA DE DIVIDIR
+       ===================================================== */
+
+    .division-wrapper {
+        display: flex;
+        justify-content: center;
+        margin: 25px 0;
+    }
+
+    .division-card {
+        background: white;
+        color: #111111;
+        border: 2px solid #dddddd;
+        border-radius: 12px;
+        padding: 28px 36px 22px 36px;
+        width: 100%;
+        max-width: 760px;
+    }
+
+    .division-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 430px;
+        margin: 0 auto 25px auto;
+        font-size: 40px;
+        font-weight: 900;
+        text-align: center;
+    }
+
+    .dividendo-box {
+        color: #C45100;
+        padding: 8px 20px 12px 20px;
+        border-right: 4px solid #111111;
+    }
+
+    .divisor-box {
+        color: #0057D9;
+        padding: 8px 20px 12px 20px;
+        border-bottom: 4px solid #111111;
+    }
+
+    .producto-box {
+        color: #137A2A;
+        padding: 12px 20px 8px 20px;
+        border-right: 4px solid #111111;
+    }
+
+    .cociente-box {
+        color: #137A2A;
+        padding: 12px 20px 8px 20px;
+    }
+
+    .resto-row {
+        width: 215px;
+        margin-left: calc(50% - 215px);
+        text-align: center;
+        font-size: 40px;
+        font-weight: 900;
+        color: #C00000;
+        border-top: 3px solid #111111;
+        padding-top: 8px;
+    }
+
+    .division-labels {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .label-chip {
+        background: #f1f5f9;
+        color: #111827;
+        border-radius: 8px;
+        padding: 7px 11px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .division-relation {
+        margin-top: 24px;
+        text-align: center;
+        font-size: 21px;
+        font-weight: 800;
+        color: #111827;
+    }
+
     </style>
     """,
     unsafe_allow_html=True
@@ -194,7 +281,6 @@ def current_state():
 
 
 def analyze_partial(partial, divisor, remaining):
-
     product = partial * divisor
 
     if product > remaining:
@@ -205,209 +291,65 @@ def analyze_partial(partial, divisor, remaining):
     return "possible", product, new_remaining
 
 
-# =========================================================
-# CUENTA DE DIVIDIR
-# =========================================================
+def dibujar_cuenta_html(
+    dividendo,
+    divisor,
+    cociente,
+    producto,
+    resto
+):
+    """
+    Construye la cuenta de dividir utilizando únicamente HTML/CSS.
+    No requiere matplotlib.
+    """
 
-def dibujar_cuenta(
-    dividendo: int,
-    divisor: int,
-    cociente: int,
-    producto: int,
-    resto: int
-) -> BytesIO:
+    return (
+        "<div class='division-wrapper'>"
+        "<div class='division-card'>"
 
-    fig, ax = plt.subplots(figsize=(8, 4.6), dpi=150)
+        "<div class='division-grid'>"
 
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 7)
-    ax.axis("off")
+        f"<div class='dividendo-box'>{dividendo}</div>"
+        f"<div class='divisor-box'>{divisor}</div>"
 
-    negro = "#111111"
-    azul = "#0057D9"
-    verde = "#137A2A"
-    naranja = "#C45100"
-    rojo = "#C00000"
-    gris = "#DDDDDD"
+        f"<div class='producto-box'>−{producto}</div>"
+        f"<div class='cociente-box'>{cociente}</div>"
 
-    ax.add_patch(
-        plt.Rectangle(
-            (0.2, 0.2),
-            9.6,
-            6.6,
-            linewidth=2,
-            edgecolor=gris,
-            facecolor="white"
-        )
+        "</div>"
+
+        f"<div class='resto-row'>{resto}</div>"
+
+        "<div class='division-labels'>"
+
+        f"<span class='label-chip'>"
+        f"<span style='color:#C45100'>●</span> "
+        f"Dividendo: {dividendo}"
+        f"</span>"
+
+        f"<span class='label-chip'>"
+        f"<span style='color:#0057D9'>●</span> "
+        f"Divisor: {divisor}"
+        f"</span>"
+
+        f"<span class='label-chip'>"
+        f"<span style='color:#137A2A'>●</span> "
+        f"Cociente: {cociente}"
+        f"</span>"
+
+        f"<span class='label-chip'>"
+        f"<span style='color:#C00000'>●</span> "
+        f"Resto: {resto}"
+        f"</span>"
+
+        "</div>"
+
+        "<div class='division-relation'>"
+        f"{dividendo} = {divisor} × {cociente} + {resto}"
+        "</div>"
+
+        "</div>"
+        "</div>"
     )
-
-    x_izq = 3.4
-    x_der = 6.3
-
-    ax.text(
-        x_izq, 5.2,
-        str(dividendo),
-        fontsize=40,
-        fontweight="bold",
-        ha="center",
-        va="center",
-        color=naranja
-    )
-
-    ax.text(
-        x_der, 5.2,
-        str(divisor),
-        fontsize=40,
-        fontweight="bold",
-        ha="center",
-        va="center",
-        color=azul
-    )
-
-    ax.plot(
-        [4.8, 4.8],
-        [2.0, 6.1],
-        color=negro,
-        linewidth=4
-    )
-
-    ax.plot(
-        [4.8, 7.55],
-        [4.4, 4.4],
-        color=negro,
-        linewidth=4
-    )
-
-    ax.text(
-        x_der, 3.4,
-        str(cociente),
-        fontsize=40,
-        fontweight="bold",
-        ha="center",
-        va="center",
-        color=verde
-    )
-
-    ax.text(
-        x_izq, 3.4,
-        f"−{producto}",
-        fontsize=34,
-        fontweight="bold",
-        ha="center",
-        va="center",
-        color=verde
-    )
-
-    ax.plot(
-        [2.35, 4.35],
-        [2.65, 2.65],
-        color=negro,
-        linewidth=3
-    )
-
-    ax.text(
-        x_izq, 1.7,
-        str(resto),
-        fontsize=40,
-        fontweight="bold",
-        ha="center",
-        va="center",
-        color=rojo
-    )
-
-    ax.annotate(
-        "Dividendo",
-        xy=(x_izq - 0.45, 5.2),
-        xytext=(0.85, 5.2),
-        fontsize=16,
-        fontweight="bold",
-        color=naranja,
-        arrowprops=dict(
-            arrowstyle="->",
-            lw=2.5,
-            color=naranja
-        ),
-        ha="left",
-        va="center"
-    )
-
-    ax.annotate(
-        "Divisor",
-        xy=(x_der + 0.25, 5.2),
-        xytext=(7.85, 5.2),
-        fontsize=16,
-        fontweight="bold",
-        color=azul,
-        arrowprops=dict(
-            arrowstyle="->",
-            lw=2.5,
-            color=azul
-        ),
-        ha="left",
-        va="center"
-    )
-
-    ax.annotate(
-        "Cociente",
-        xy=(x_der + 0.25, 3.4),
-        xytext=(7.85, 3.4),
-        fontsize=16,
-        fontweight="bold",
-        color=verde,
-        arrowprops=dict(
-            arrowstyle="->",
-            lw=2.5,
-            color=verde
-        ),
-        ha="left",
-        va="center"
-    )
-
-    ax.annotate(
-        "Resto",
-        xy=(x_izq + 0.20, 1.7),
-        xytext=(4.75, 1.15),
-        fontsize=16,
-        fontweight="bold",
-        color=rojo,
-        arrowprops=dict(
-            arrowstyle="->",
-            lw=2.5,
-            color=rojo
-        ),
-        ha="left",
-        va="center"
-    )
-
-    ax.text(
-        5,
-        0.55,
-        (
-            f"Al repartir {dividendo} objetos en "
-            f"{divisor} grupos iguales, quedan "
-            f"{cociente} objetos en cada grupo y "
-            f"quedan {resto} objetos sin repartir."
-        ),
-        fontsize=12,
-        ha="center",
-        va="center",
-        color=negro
-    )
-
-    buffer = BytesIO()
-
-    fig.savefig(
-        buffer,
-        format="png",
-        bbox_inches="tight",
-        facecolor="white"
-    )
-
-    plt.close(fig)
-
-    buffer.seek(0)
-
-    return buffer
 
 
 # =========================================================
@@ -462,7 +404,6 @@ with st.container(border=True):
         )
 
     with c3:
-
         st.write("")
         st.write("")
 
@@ -501,7 +442,9 @@ divisor = st.session_state.divisor
 cociente_acumulado, usado, restante = current_state()
 
 st.markdown(
-    f"<div class='main-expression'>{dividendo} ÷ {divisor}</div>",
+    f"<div class='main-expression'>"
+    f"{dividendo} ÷ {divisor}"
+    f"</div>",
     unsafe_allow_html=True
 )
 
@@ -611,7 +554,7 @@ with p2:
 
 
 # ---------------------------------------------------------
-# 3. ESTRATEGIA REGISTRADA
+# 3. LO REGISTRADO
 # ---------------------------------------------------------
 
 with p3:
@@ -666,7 +609,10 @@ with c_accept:
         disabled=not can_register
     ):
 
-        st.session_state.aproximaciones.append(propuesta)
+        st.session_state.aproximaciones.append(
+            propuesta
+        )
+
         st.rerun()
 
 
@@ -679,6 +625,7 @@ with c_undo:
     ):
 
         st.session_state.aproximaciones.pop()
+
         st.rerun()
 
 
@@ -691,6 +638,7 @@ with c_reset:
     ):
 
         reset_strategy()
+
         st.rerun()
 
 
@@ -705,6 +653,8 @@ if not st.session_state.aproximaciones:
     st.info(
         "Todavía no registraste aproximaciones."
     )
+
+    expresion_cociente = ""
 
 else:
 
@@ -793,20 +743,21 @@ with st.container(border=True):
 
     if mostrar_cuenta:
 
-        # Resultado completo de la división
         cociente_final = dividendo // divisor
         resto_final = dividendo % divisor
         producto_final = divisor * cociente_final
 
-        st.image(
-            dibujar_cuenta(
-                dividendo,
-                divisor,
-                cociente_final,
-                producto_final,
-                resto_final
-            ),
-            use_container_width=True
+        cuenta_html = dibujar_cuenta_html(
+            dividendo,
+            divisor,
+            cociente_final,
+            producto_final,
+            resto_final
+        )
+
+        st.markdown(
+            cuenta_html,
+            unsafe_allow_html=True
         )
 
         st.markdown(
@@ -815,7 +766,7 @@ with st.container(border=True):
 - **{divisor}** es el **divisor**.
 - **{cociente_final}** es el **cociente**.
 - **{resto_final}** es el **resto**.
-- **{producto_final}** es la cantidad representada por **{divisor} × {cociente_final}**.
+- **{producto_final}** corresponde a **{divisor} × {cociente_final}**.
 """
         )
 
@@ -825,7 +776,7 @@ with st.container(border=True):
 
             st.markdown(
                 f"""
-Tu estrategia construyó hasta ahora:
+Hasta ahora construiste el cociente mediante:
 
 **{expresion_cociente} = {cociente_acumulado}**
 
@@ -839,17 +790,17 @@ La cuenta de dividir muestra como cociente:
 
 
 # =========================================================
-# PARA OBSERVAR
+# PREGUNTAS
 # =========================================================
 
 st.markdown("### Para observar en esta versión")
 
 st.markdown(
     """
-- ¿Qué aproximaciones resultan útiles para avanzar?
+- ¿Qué aproximaciones permiten avanzar?
 - ¿Cómo se construye el cociente a partir de los cocientes parciales?
-- ¿Qué cambia cuando se elige una aproximación mayor o menor?
-- ¿Qué relación puede establecerse entre la estrategia construida y la cuenta de dividir?
+- ¿Qué cambia cuando elegís una aproximación mayor o menor?
+- ¿Qué relación encontrás entre la estrategia construida y la cuenta de dividir?
 """
 )
 
@@ -877,4 +828,4 @@ st.caption(
     "Instituto CeFIEC – FCEN – UBA"
 )
 
-st.caption("Versión 1.0")
+st.caption("Versión 1.1")
