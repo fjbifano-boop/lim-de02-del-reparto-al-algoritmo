@@ -530,9 +530,7 @@ st.markdown("### Estrategia registrada")
 
 if not st.session_state.aproximaciones:
 
-    st.info(
-        "Todavía no registraste aproximaciones."
-    )
+    st.info("Todavía no registraste aproximaciones.")
 
 else:
 
@@ -548,36 +546,20 @@ else:
         nuevo = parcial - producto
         acumulado += aproximacion
 
+        historial_html = (
+            f"<div class='history-card'>"
+            f"<b>Paso {i}</b><br><br>"
+            f"Cociente parcial: "
+            f"<span class='orange'>{aproximacion}</span><br>"
+            f"Producto: "
+            f"<span class='green'>{divisor} × {aproximacion} = {producto}</span><br>"
+            f"Quedan: "
+            f"<span class='red'>{nuevo}</span>"
+            f"</div>"
+        )
+
         st.markdown(
-            f"""
-            <div class='history-card'>
-
-                <b>Paso {i}</b>
-
-                <br><br>
-
-                Cociente parcial:
-                <span class='orange'>
-                    {aproximacion}
-                </span>
-
-                <br>
-
-                Producto:
-                <span class='green'>
-                    {divisor} × {aproximacion}
-                    = {producto}
-                </span>
-
-                <br>
-
-                Quedan:
-                <span class='red'>
-                    {nuevo}
-                </span>
-
-            </div>
-            """,
+            historial_html,
             unsafe_allow_html=True
         )
 
@@ -588,19 +570,19 @@ else:
         for x in st.session_state.aproximaciones
     )
 
-    st.markdown(
-        f"""
-        <div class='info'>
-            Cociente construido hasta ahora:
-            <span class='orange'>
-                {expresion_cociente}
-                = {acumulado}
-            </span>
-        </div>
-        """,
-        unsafe_allow_html=True
+    resumen_html = (
+        f"<div class='info'>"
+        f"Cociente construido hasta ahora: "
+        f"<span class='orange'>"
+        f"{expresion_cociente} = {acumulado}"
+        f"</span>"
+        f"</div>"
     )
 
+    st.markdown(
+        resumen_html,
+        unsafe_allow_html=True
+    )
 
 # =========================================================
 # CIERRE DE LA DIVISIÓN
