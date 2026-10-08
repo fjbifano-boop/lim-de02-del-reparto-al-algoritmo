@@ -1,16 +1,8 @@
 import streamlit as st
 
-st.title("¿Cómo economizar una cuenta de dividir?")
-
-st.subheader(
-    "Exploramos distintas maneras de construir el cociente "
-    "mediante aproximaciones sucesivas"
-)
-
-st.write(
-    "Elegí cocientes parciales, observá qué producen y compará "
-    "distintas estrategias. ¿Cómo podrías llegar al resultado "
-    "utilizando menos pasos?"
+st.set_page_config(
+    page_title="LIM - ¿Cómo economizar una cuenta de dividir?",
+    layout="wide"
 )
 
 # =========================================================
@@ -153,14 +145,41 @@ st.markdown(
         font-weight: 900;
     }
 
+    /* =====================================================
+       BOTONES
+       ===================================================== */
+
     div.stButton > button {
-        color: #111827 !important;
-        font-weight: 700 !important;
+        background: #f97316 !important;
+        color: #ffffff !important;
+        border: 2px solid #fb923c !important;
+        border-radius: 9px !important;
+        font-weight: 800 !important;
+        font-size: 16px !important;
+        min-height: 48px !important;
+        box-shadow: 0 3px 8px rgba(0,0,0,.30) !important;
+        transition: all .15s ease !important;
+    }
+
+    div.stButton > button:hover {
+        background: #ea580c !important;
+        color: #ffffff !important;
+        border-color: #fdba74 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 12px rgba(0,0,0,.38) !important;
+    }
+
+    div.stButton > button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,.25) !important;
     }
 
     div.stButton > button:disabled {
-        color: #64748b !important;
-        opacity: 0.70;
+        background: #334155 !important;
+        color: #94a3b8 !important;
+        border: 2px solid #475569 !important;
+        box-shadow: none !important;
+        opacity: 0.65 !important;
     }
 
     /* =====================================================
@@ -332,7 +351,7 @@ def analyze_partial(partial, divisor, remaining):
 
 def dibujar_cuenta_html(dividendo, divisor, aproximaciones):
     """
-    Construye la cuenta progresivamente utilizando solamente
+    Construye progresivamente la cuenta utilizando solamente
     las aproximaciones efectivamente registradas.
     """
 
@@ -478,15 +497,17 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("Del reparto al algoritmo")
+st.title("¿Cómo economizar una cuenta de dividir?")
 
 st.subheader(
-    "Construimos el cociente mediante aproximaciones sucesivas"
+    "Exploramos distintas maneras de construir el cociente "
+    "mediante aproximaciones sucesivas"
 )
 
 st.write(
-    "Elegí un cociente parcial, anticipá qué producto genera "
-    "y decidí si querés incorporarlo a tu estrategia."
+    "Elegí cocientes parciales, observá qué producen y compará "
+    "distintas estrategias. ¿Cómo podrías llegar al resultado "
+    "utilizando menos pasos?"
 )
 
 
@@ -498,7 +519,7 @@ with st.container(border=True):
 
     st.markdown("### División a explorar")
 
-    c1, c2, c3 = st.columns([1.2, 1.2, .8])
+    c1, c2, c3 = st.columns([1.2, 1.2, .9])
 
     with c1:
 
@@ -519,29 +540,34 @@ with st.container(border=True):
         st.write("")
         st.write("")
 
-        if st.button(
-            "Aplicar",
+        iniciar_nueva = st.button(
+            "Iniciar nueva división",
             use_container_width=True
+        )
+
+    if iniciar_nueva:
+
+        nuevo_dividendo = read_int(
+            dividendo_txt,
+            "El dividendo"
+        )
+
+        nuevo_divisor = read_int(
+            divisor_txt,
+            "El divisor"
+        )
+
+        if (
+            nuevo_dividendo is not None
+            and nuevo_divisor is not None
         ):
 
-            dividendo = read_int(
-                dividendo_txt,
-                "El dividendo"
-            )
+            st.session_state.dividendo = nuevo_dividendo
+            st.session_state.divisor = nuevo_divisor
 
-            divisor = read_int(
-                divisor_txt,
-                "El divisor"
-            )
+            reset_strategy()
 
-            if dividendo is not None and divisor is not None:
-
-                st.session_state.dividendo = dividendo
-                st.session_state.divisor = divisor
-
-                reset_strategy()
-
-                st.rerun()
+            st.rerun()
 
 
 # =========================================================
@@ -750,6 +776,7 @@ with c_accept:
 
     if st.button(
         "Registrar esta aproximación",
+        type="primary",
         use_container_width=True,
         disabled=not can_register
     ):
@@ -889,17 +916,16 @@ if restante < divisor:
 
 
 # =========================================================
-# DEL PROCEDIMIENTO AL ALGORITMO
+# LA CUENTA QUE SE VA CONSTRUYENDO
 # =========================================================
 
-st.markdown("### Del procedimiento al algoritmo")
+st.markdown("### La cuenta que vas construyendo")
 
 with st.container(border=True):
 
     st.write(
-        "Podés hacer visible la cuenta para observar cómo "
-        "las aproximaciones que registraste van construyendo "
-        "el procedimiento."
+        "Hacé visible la cuenta para observar cómo cada aproximación "
+        "que registrás modifica el procedimiento."
     )
 
     mostrar_cuenta = st.checkbox(
@@ -921,7 +947,9 @@ with st.container(border=True):
 
         if st.session_state.aproximaciones:
 
-            st.markdown("#### Mirá las dos formas de registrar la estrategia")
+            st.markdown(
+                "#### Mirá las dos formas de registrar la estrategia"
+            )
 
             st.markdown(
                 f"""
@@ -938,18 +966,18 @@ al producto que se resta y a una nueva cantidad pendiente.
 
 
 # =========================================================
-# PREGUNTAS
+# PREGUNTAS PARA EXPLORAR
 # =========================================================
 
-st.markdown("### Para observar en esta versión")
+st.markdown("### Para seguir explorando")
 
 st.markdown(
     """
-- ¿Qué aproximaciones permiten avanzar?
-- ¿Cómo se construye el cociente a partir de los cocientes parciales?
-- ¿Qué cambia cuando elegís una aproximación mayor o menor?
-- ¿Qué relaciones aparecen entre las aproximaciones, los productos que se restan y las cantidades que van quedando?
-- ¿Cómo se relaciona la estrategia construida con la cuenta de dividir?
+- ¿Podrías llegar al mismo cociente eligiendo otras aproximaciones?
+- ¿Qué hace que una estrategia necesite más o menos pasos?
+- ¿Cómo podrías modificar tu estrategia para economizar la cuenta?
+- ¿Qué relaciones entre los números te permiten elegir aproximaciones mayores sin pasarte?
+- ¿Qué se mantiene y qué cambia entre distintas estrategias para una misma división?
 """
 )
 
@@ -977,4 +1005,4 @@ st.caption(
     "Instituto CeFIEC – FCEN – UBA"
 )
 
-st.caption("Versión 1.2")
+st.caption("Versión 1.3")
