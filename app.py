@@ -72,18 +72,16 @@ def registrar_aproximacion():
     parte = int(raw)
     restante = st.session_state.dividendo - st.session_state.divisor * sum(st.session_state.aproximaciones)
     if restante >= st.session_state.divisor and parte * st.session_state.divisor <= restante:
-        st.session_state.aproximaciones.append(parte)
-        st.session_state.propuesta = ""
+        st.session_state.aproximaciones = [*st.session_state.aproximaciones, parte]
 
 
 def deshacer_aproximacion():
     if st.session_state.aproximaciones:
-        st.session_state.aproximaciones.pop()
+        st.session_state.aproximaciones = st.session_state.aproximaciones[:-1]
 
 
 def reiniciar_estrategia():
     st.session_state.aproximaciones = []
-    st.session_state.propuesta = ""
 
 
 def current_state():
@@ -163,7 +161,6 @@ with st.container(border=True):
                 st.session_state.dividendo = int(raw_a)
                 st.session_state.divisor = int(raw_b)
                 st.session_state.aproximaciones = []
-                st.session_state.propuesta = ''
                 st.rerun()
 
 if st.session_state.dividendo is None:
@@ -185,7 +182,7 @@ with p1:
     with st.container(border=True):
         st.markdown('#### Proponer')
         st.text_input('¿Qué cociente parcial querés probar?', key='propuesta', placeholder='Por ejemplo, 100')
-        st.caption('Es una propuesta: todavía no modifica la cuenta.')
+        st.caption('Es una propuesta: todavía no modifica la cuenta. Después de registrarla, ingresá otra aproximación.')
 
 raw_proposal = st.session_state.propuesta.strip()
 proposal = int(raw_proposal) if raw_proposal.isdecimal() else None
@@ -277,5 +274,6 @@ st.markdown('''
 ''')
 
 st.divider()
+st.caption('Versión 1.4.2')
 st.markdown('**¿Usaste este laboratorio?** Si sos docente y estás pensando utilizarlo o ya lo probaste con estudiantes, nos interesa conocer tu experiencia. [Contacto: fjbifano@ccpems.exactas.uba.ar](mailto:fjbifano@ccpems.exactas.uba.ar)')
 st.caption('Laboratorio de Ideas Matemáticas (LIM) · Instituto CeFIEC – FCEN – UBA · Versión 1.4.1')
