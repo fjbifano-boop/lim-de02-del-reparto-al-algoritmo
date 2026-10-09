@@ -14,6 +14,7 @@ for key, default in {
     "entrada_divisor": "",
     "propuesta": "",
     "mostrar_cuenta": True,
+    "aviso_accion": "",
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -64,6 +65,22 @@ div.stButton > button[kind="secondary"]:disabled {background:#334155 !important;
 """, unsafe_allow_html=True)
 
 
+def iniciar_division():
+    raw_a = st.session_state.entrada_dividendo.strip()
+    raw_b = st.session_state.entrada_divisor.strip()
+    if not raw_a.isdecimal() or not raw_b.isdecimal():
+        st.session_state.aviso_accion = "Ingresá dos números enteros no negativos."
+        return
+    if int(raw_b) == 0:
+        st.session_state.aviso_accion = "El divisor debe ser mayor que cero."
+        return
+    st.session_state.dividendo = int(raw_a)
+    st.session_state.divisor = int(raw_b)
+    st.session_state.aproximaciones = []
+    st.session_state.propuesta = ""
+    st.session_state.aviso_accion = "Nueva división iniciada. Elegí la primera aproximación."
+
+
 def registrar_aproximacion():
     """Callback: se ejecuta antes de crear los widgets del siguiente ciclo."""
     raw = st.session_state.propuesta.strip()
@@ -73,15 +90,22 @@ def registrar_aproximacion():
     restante = st.session_state.dividendo - st.session_state.divisor * sum(st.session_state.aproximaciones)
     if restante >= st.session_state.divisor and parte * st.session_state.divisor <= restante:
         st.session_state.aproximaciones = [*st.session_state.aproximaciones, parte]
+        st.session_state.propuesta = ""
+        st.session_state.aviso_accion = f"Registraste el cociente parcial {parte}. Podés proponer otro."
 
 
 def deshacer_aproximacion():
     if st.session_state.aproximaciones:
+        eliminado = st.session_state.aproximaciones[-1]
         st.session_state.aproximaciones = st.session_state.aproximaciones[:-1]
+        st.session_state.propuesta = ""
+        st.session_state.aviso_accion = f"Deshiciste la aproximación {eliminado}."
 
 
 def reiniciar_estrategia():
     st.session_state.aproximaciones = []
+    st.session_state.propuesta = ""
+    st.session_state.aviso_accion = "Estrategia reiniciada. La división se mantiene."
 
 
 def current_state():
@@ -150,18 +174,10 @@ with st.container(border=True):
         with b:
             st.text_input('Divisor', key='entrada_divisor', placeholder='Escribí el divisor')
             st.caption('──────────────  Cociente por construir')
-        if st.button('Iniciar nueva división', type='primary', use_container_width=True):
-            raw_a = st.session_state.entrada_dividendo.strip()
-            raw_b = st.session_state.entrada_divisor.strip()
-            if not raw_a.isdecimal() or not raw_b.isdecimal():
-                st.error('Ingresá números enteros no negativos en ambos espacios.')
-            elif int(raw_b) == 0:
-                st.error('El divisor debe ser mayor que cero.')
-            else:
-                st.session_state.dividendo = int(raw_a)
-                st.session_state.divisor = int(raw_b)
-                st.session_state.aproximaciones = []
-                st.rerun()
+        st.button('Iniciar nueva división', type='primary', use_container_width=True, on_click=iniciar_division)
+
+if st.session_state.aviso_accion:
+    st.info(st.session_state.aviso_accion)
 
 if st.session_state.dividendo is None:
     st.info('Para comenzar, escribí una división y pulsá «Iniciar nueva división».')
@@ -203,7 +219,7 @@ with p2:
         elif possible:
             st.markdown(f'<div class="notice good"><b>{divisor} × {proposal} = {product}</b><br>Si la registrás, quedarán <b>{remaining - product}</b>. Podés registrarla o probar otra.</div>', unsafe_allow_html=True)
         else:
-            st.markdown(f'<div class="notice bad"><b>{divisor} × {proposal} = {product}</b><br>Supera lo que queda ({remaining}) en <b>{product - remaining}</b>.</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="notice bad"><b>{divisor} × {proposal} = {product}</b><br>Supera lo que queda ({remaining}) en <b>{product - remaining}</b>.<br><br><b>No se puede registrar esta propuesta.</b> Probá con un cociente parcial menor.</div>', unsafe_allow_html=True)
 
 with p3:
     with st.container(border=True):
@@ -212,6 +228,11 @@ with p3:
         st.caption('Cantidad que queda por dividir')
         st.write(f'Cociente parcial acumulado: **{quotient}**')
         st.write(f'Aproximaciones registradas: **{len(st.session_state.aproximaciones)}**')
+        if st.session_state.aproximaciones:
+            st.caption('Última aproximación: ' + str(st.session_state.aproximaciones[-1]))
+
+if not finished and proposal is not None and not possible:
+    st.caption('El botón Registrar está deshabilitado porque el producto supera la cantidad restante.')
 
 c1, c2, c3 = st.columns(3)
 with c1:
@@ -254,10 +275,12 @@ if not st.session_state.aproximaciones:
     st.info('Todavía no registraste aproximaciones.')
 else:
     pending = dividendo
+    acumulado = 0
     for i, part in enumerate(st.session_state.aproximaciones, 1):
         prod = divisor * part
         pending -= prod
-        st.markdown(f'<div class="history"><b>Paso {i}</b> · Cociente parcial: <strong>{part}</strong> · Producto: {divisor} × {part} = {prod} · Quedan: <strong>{pending}</strong></div>', unsafe_allow_html=True)
+        acumulado += part
+        st.markdown(f'<div class="history"><b>Paso {i}</b> · Cociente parcial: <strong>{part}</strong> · Producto: {divisor} × {part} = {prod} · Quedan: <strong>{pending}</strong> · Cociente acumulado: <strong>{acumulado}</strong></div>', unsafe_allow_html=True)
     expression = ' + '.join(map(str, st.session_state.aproximaciones))
     st.markdown(f'<div class="notice">Cociente construido: <b>{expression} = {quotient}</b></div>', unsafe_allow_html=True)
 
