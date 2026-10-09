@@ -156,7 +156,7 @@ def progressive_account(dividendo, divisor, approximations):
 
 
 st.markdown('<div class="topbar"><b>DE-02</b> &nbsp;|&nbsp; Aproximaciones sucesivas en la división</div>', unsafe_allow_html=True)
-st.title('¿Cómo economizar una cuenta de dividir?')
+st.title('¿Cómo hacer más corta una cuenta de dividir?')
 st.write('Explorá diferentes maneras de construir el cociente mediante aproximaciones sucesivas. ¿Cómo podrías resolver una misma división con menos pasos?')
 
 # ---------------------------------------------------------
