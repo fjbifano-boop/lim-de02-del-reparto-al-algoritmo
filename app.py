@@ -64,6 +64,28 @@ div.stButton > button[kind="secondary"]:disabled {background:#334155 !important;
 """, unsafe_allow_html=True)
 
 
+def registrar_aproximacion():
+    """Callback: se ejecuta antes de crear los widgets del siguiente ciclo."""
+    raw = st.session_state.propuesta.strip()
+    if not raw.isdecimal() or int(raw) <= 0:
+        return
+    parte = int(raw)
+    restante = st.session_state.dividendo - st.session_state.divisor * sum(st.session_state.aproximaciones)
+    if restante >= st.session_state.divisor and parte * st.session_state.divisor <= restante:
+        st.session_state.aproximaciones.append(parte)
+        st.session_state.propuesta = ""
+
+
+def deshacer_aproximacion():
+    if st.session_state.aproximaciones:
+        st.session_state.aproximaciones.pop()
+
+
+def reiniciar_estrategia():
+    st.session_state.aproximaciones = []
+    st.session_state.propuesta = ""
+
+
 def current_state():
     total = sum(st.session_state.aproximaciones)
     return total, st.session_state.dividendo - st.session_state.divisor * total
@@ -196,22 +218,29 @@ with p3:
 
 c1, c2, c3 = st.columns(3)
 with c1:
-    if st.button('Registrar esta aproximación', type='primary', use_container_width=True,
-                 disabled=finished or not possible):
-        st.session_state.aproximaciones.append(proposal)
-        st.session_state.propuesta = ''
-        st.rerun()
+    st.button(
+        'Registrar esta aproximación',
+        type='primary',
+        use_container_width=True,
+        disabled=finished or not possible,
+        on_click=registrar_aproximacion,
+    )
 with c2:
-    if st.button('Deshacer última aproximación', type='secondary', use_container_width=True,
-                 disabled=not st.session_state.aproximaciones):
-        st.session_state.aproximaciones.pop()
-        st.rerun()
+    st.button(
+        'Deshacer última aproximación',
+        type='secondary',
+        use_container_width=True,
+        disabled=not st.session_state.aproximaciones,
+        on_click=deshacer_aproximacion,
+    )
 with c3:
-    if st.button('Reiniciar estrategia', type='secondary', use_container_width=True,
-                 disabled=not st.session_state.aproximaciones):
-        st.session_state.aproximaciones = []
-        st.session_state.propuesta = ''
-        st.rerun()
+    st.button(
+        'Reiniciar estrategia',
+        type='secondary',
+        use_container_width=True,
+        disabled=not st.session_state.aproximaciones,
+        on_click=reiniciar_estrategia,
+    )
 
 # ---------------------------------------------------------
 # La misma cuenta elegida al inicio se construye por pasos.
@@ -249,4 +278,4 @@ st.markdown('''
 
 st.divider()
 st.markdown('**¿Usaste este laboratorio?** Si sos docente y estás pensando utilizarlo o ya lo probaste con estudiantes, nos interesa conocer tu experiencia. [Contacto: fjbifano@ccpems.exactas.uba.ar](mailto:fjbifano@ccpems.exactas.uba.ar)')
-st.caption('Laboratorio de Ideas Matemáticas (LIM) · Instituto CeFIEC – FCEN – UBA · Versión 1.4')
+st.caption('Laboratorio de Ideas Matemáticas (LIM) · Instituto CeFIEC – FCEN – UBA · Versión 1.4.1')
