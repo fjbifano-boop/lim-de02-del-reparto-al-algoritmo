@@ -1,7 +1,7 @@
 import html
 import streamlit as st
 
-st.set_page_config(page_title="LIM · ¿Cómo economizar una cuenta de dividir?", layout="wide")
+st.set_page_config(page_title="LIM · ¿Cómo achicar una cuenta de dividir?", layout="wide")
 
 # ---------------------------------------------------------
 # Estado: los campos comienzan vacíos; no hay cuenta activa.
